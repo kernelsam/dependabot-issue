@@ -1,0 +1,41 @@
+name: linter
+
+on:
+  workflow_call:
+    inputs:
+      filter-regex-include:
+        default: ".*"
+        description: Regular expression defining which files will be processed by linters.
+        required: false
+        type: string
+      validate-all-codebase:
+        default: false
+        description: 'Lint all files or only modified: true/false.'
+        required: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  lint-code-base:
+    name: lint code base
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: lint code base
+        uses: super-linter/super-linter@v5.7.1
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # only lint new and modified files
+          VALIDATE_ALL_CODEBASE: ${{ inputs.validate-all-codebase }}
+          VALIDATE_SHELL_SHFMT: false
